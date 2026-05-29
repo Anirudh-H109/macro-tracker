@@ -3,6 +3,10 @@ import pandas as pd
 from fredapi import Fred
 import yfinance as yf
 import plotly.express as px
+import requests
+import datetime
+
+
 
 st.title("Macro Event Impact Tracker")
 st.write("Tracking how CPI, unemployment and Fed rates affect markets")
@@ -61,14 +65,19 @@ st.plotly_chart(fig_spy_cpi)
 st.subheader("CPI - Surprise Score")
 
 surprise_score={
-    'Month' : ['Jan 2026','Feb 2026','March 2026','Apr 2026'],
-    'Actual %' : [3.0, 2.8, 2.6, 2.4],
-    'Forecast %': [2.9, 2.9, 2.7, 2.6],
-    'Surprise' : ['+0.1', '-0.1', '-0.1', '-0.2']
+    'Month' : ['May 2025','June 2025','July 2025','Aug 2025','Sep 2025','Oct 2025','Jan 2026','Feb 2026','March 2026','Apr 2026','May 2026'],
+    'Actual %' : [0.2,0.1,0.3,0.2,0.4,0.3,0.3,0.2,0.3,0.9,0.6],
+    'Forecast %': [0.3,0.2,0.3,0.2,0.3,0.4,0.3,0.3,0.3,1.0,0.6],
+    'Surprise' : [-0.1,-0.1,0.0,0.0,0.1,-0.1,0.0,-0.1,0.0,-0.1,0.0]
 }
 
 df_surprise=pd.DataFrame(surprise_score)
 st.dataframe(df_surprise, hide_index=True)
+
+fig_surprise = px.bar(df_surprise, x='Month', y='Surprise', title='Surprise score for last 12 months',color='Surprise',
+                      color_continuous_scale=['red', 'grey', 'green'],
+                      color_continuous_midpoint=0)
+st.plotly_chart(fig_surprise)
 
 #EUR/USD
 eurusd_day=yf.download('EURUSD=X',start='2026-04-10', end='2026-04-11', interval='5m')
