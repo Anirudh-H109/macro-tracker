@@ -11,14 +11,14 @@ Also includes a CPI surprise score table showing whether recent prints beat or m
 
 V2 adds:
 
-Interactive dropdown to select any CPI release date
+1) Interactive dropdown to select any CPI release date
 
-NFP (Non-Farm Payrolls) monthly jobs chart
+2) NFP (Non-Farm Payrolls) monthly jobs chart
 
-TLT bonds chart
+3) TLT bonds chart
 
-Colour coded CPI surprise score bar chart
+4) Colour coded CPI surprise score bar chart
 
-Automatic fallback to daily data for dates older than 60 days
+5) Automatic fallback to daily data for dates older than 60 days
 
 Link : https://macro-tracker-v1.streamlit.app/
