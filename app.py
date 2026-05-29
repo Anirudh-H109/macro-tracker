@@ -79,6 +79,7 @@ fig_surprise = px.bar(df_surprise, x='Month', y='Surprise', title='Surprise scor
                       color_continuous_midpoint=0)
 st.plotly_chart(fig_surprise)
 
+
 #EUR/USD
 eurusd_day=yf.download('EURUSD=X',start='2026-04-10', end='2026-04-11', interval='5m')
 eurusd_day.index = eurusd_day.index.tz_convert('America/New_York')
