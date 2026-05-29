@@ -54,14 +54,85 @@ fig_nfp = px.line(
 )
 st.plotly_chart(fig_nfp)
 
-#SPY on CPI Release
-spy_cpi_day = yf.download('SPY', start='2026-04-10', end='2026-04-11', interval='5m')
-spy_cpi_day = spy_cpi_day['Close']
-fig_spy_cpi = px.line(spy_cpi_day, title='SPY on CPI Day (Apr 10 2026)')
-st.plotly_chart(fig_spy_cpi)
+#CPI Dropdown option
+release_dates = {
+    'May 2025': '2025-05-14',
+    'June 2025': '2025-06-13',
+    'July 2025': '2025-07-11',
+    'Aug 2025': '2025-08-13',
+    'Sep 2025': '2025-09-11',
+    'Oct 2025': '2025-10-10',
+    'Jan 2026': '2026-01-13',
+    'Feb 2026': '2026-02-13',
+    'March 2026': '2026-03-12',
+    'Apr 2026': '2026-04-10',
+    'May 2026': '2026-05-13'
+}
+
+st.subheader("Choose the CPI release date to see Market reaction on that day")
+selected_month = st.selectbox("Choose a Date: ", list(release_dates.keys()), index=9)
+
+chosen_date_str = release_dates[selected_month]
+chosen_date = datetime.datetime.strptime(chosen_date_str, "%Y-%m-%d")
+
+today = datetime.datetime.now()
+days_ago = (today - chosen_date).days
+
+# If else to check if intraday data is available
+if days_ago <= 60:
+    start_date = chosen_date.strftime("%Y-%m-%d")
+    end_date = (chosen_date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    chart_interval = '5m'
+    is_intraday = True
+else:
+    start_date = (chosen_date - datetime.timedelta(days=10)).strftime("%Y-%m-%d")
+    end_date = (chosen_date + datetime.timedelta(days=10)).strftime("%Y-%m-%d")
+    chart_interval = '1d'
+    is_intraday = False
 
 
-#Suprise Score
+# SPY on CPI Release
+spy_cpi_day = yf.download('SPY', start=start_date, end=end_date, interval=chart_interval)
+if not spy_cpi_day.empty:
+    spy_close = spy_cpi_day['Close']
+    
+    title_text = f"⚡ SPY 5-Min Flash Volatility ({selected_month})" if is_intraday else f"📈 SPY 20-Day Macro Trend ({selected_month})"
+    
+    fig_spy_cpi = px.line(spy_close, title=title_text, labels={'Value': 'Stock Price', 'index': 'Timeline'}, markers=not is_intraday)
+    
+    fig_spy_cpi.update_layout(hovermode="x unified", plot_bgcolor="rgba(0,0,0,0)")
+    st.plotly_chart(fig_spy_cpi)
+else:
+    st.warning(f"No SPY daily data found for {start_date}. The market might have been closed (weekend/holiday).")
+
+
+# EUR/USD
+eurusd_day = yf.download('EURUSD=X', start=start_date, end=end_date, interval=chart_interval)
+
+if not eurusd_day.empty:
+    if is_intraday:
+        # Timezone fixes are safely isolated inside intraday only!
+        if eurusd_day.index.tz is None:
+            eurusd_day.index = eurusd_day.index.tz_localize('UTC')
+        eurusd_day.index = eurusd_day.index.tz_convert('America/New_York')
+        eurusd_day = eurusd_day.between_time('08:00', '16:00')
+        
+        eurusd_close = eurusd_day['Close']
+        title_text = f'EUR/USD Intraday data on {chosen_date} from 8:00 to 16:00'
+        # Fixed 'lables' typo here
+        fig_eurusd = px.line(eurusd_close, title=title_text, labels={'Value': 'Price', 'index': 'Time'}, markers=False)
+    else:
+        eurusd_close = eurusd_day['Close']
+        title_text = f'EUR/USD 20 day graph with {chosen_date} being the central date'
+        # Fixed 'lables' typo here
+        fig_eurusd = px.line(eurusd_close, title=title_text, labels={'Value': 'Price', 'index': 'Time'}, markers=True)
+
+    fig_eurusd.update_layout(hovermode="x unified", plot_bgcolor="rgba(0,0,0,0)")
+    st.plotly_chart(fig_eurusd)
+else:
+    st.warning(f"No EUR/USD data found for {start_date}.")
+
+# Surprise Score
 st.subheader("CPI - Surprise Score")
 
 surprise_score={
@@ -78,15 +149,6 @@ fig_surprise = px.bar(df_surprise, x='Month', y='Surprise', title='Surprise scor
                       color_continuous_scale=['red', 'grey', 'green'],
                       color_continuous_midpoint=0)
 st.plotly_chart(fig_surprise)
-
-
-#EUR/USD
-eurusd_day=yf.download('EURUSD=X',start='2026-04-10', end='2026-04-11', interval='5m')
-eurusd_day.index = eurusd_day.index.tz_convert('America/New_York')
-eurusd_day = eurusd_day.between_time('08:00', '16:00')
-eurusd_day=eurusd_day['Close']
-fig_eurusd=px.line(eurusd_day,title='EUR/USD on CPI Day')
-st.plotly_chart(fig_eurusd)
 
 
 #TLT Bonds
