@@ -152,8 +152,7 @@ st.plotly_chart(fig_surprise)
 
 
 #TLT Bonds
-tlt=yf.download('TLT',start='2020-01-01', end='2026-05-25')
-eurusd_day.index = eurusd_day.index.tz_convert('America/New_York')
+tlt=yf.download('TLT',start='2020-01-01', end=datetime.datetime.now().strftime("%Y-%m-%d"))
 tlt=tlt['Close']
 fig_tlt=px.line(tlt,title='TLT Data')
 st.plotly_chart(fig_tlt)
